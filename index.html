@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BITPET — Tu mascota virtual</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0a0a0f;
+    --panel:    #12121a;
+    --screen:   #0d1f0d;
+    --screen2:  #0a1a0a;
+    --glow:     #39ff14;
+    --glow2:    #00e5ff;
+    --amber:    #ffb300;
+    --pink:     #ff2d78;
+    --purple:   #9b4dff;
+    --red:      #ff3a3a;
+    --text:     #c8ffc8;
+    --textdim:  #4a7a4a;
+    --border:   #1e3a1e;
+    --pixel:    2px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'VT323', monospace;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px 10px 40px;
+    overflow-x: hidden;
+  }
+
+  /* Scanlines */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.18) 2px,
+      rgba(0,0,0,0.18) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ---- HEADER ---- */
+  .header {
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .header h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(18px, 4vw, 28px);
+    color: var(--glow);
+    text-shadow: 0 0 8px var(--glow), 0 0 20px var(--glow);
+    letter-spacing: 4px;
+  }
+  .header .sub {
+    font-size: 18px;
+    color: var(--textdim);
+    margin-top: 4px;
+    letter-spacing: 2px;
+  }
+
+  /* ---- DEVICE SHELL ---- */
+  .device {
+    background: var(--panel);
+    border: 3px solid #1e3a1e;
+    border-radius: 24px 24px 40px 40px;
+    padding: 18px 18px 28px;
+    width: min(420px, 100%);
+    box-shadow:
+      0 0 0 1px #0a0a0f,
+      0 0 30px rgba(57,255,20,0.08),
+      inset 0 1px 0 rgba(255,255,255,0.04);
+    position: relative;
+  }
+  .device-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .device-name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: var(--textdim);
+    letter-spacing: 2px;
+  }
+  .status-lights {
+    display: flex;
+    gap: 6px;
+  }
+  .status-lights span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--textdim);
+  }
+  .status-lights span.on {
+    background: var(--glow);
+    box-shadow: 0 0 6px var(--glow);
+    animation: blink 2s ease-in-out infinite;
+  }
+  @keyframes blink {
+    0%,100% { opacity:1; } 50% { opacity: 0.3; }
+  }
+
+  /* ---- SCREEN ---- */
+  .screen-outer {
+    background: #060e06;
+    border: 3px solid #1a2e1a;
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 14px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 10px rgba(57,255,20,0.05);
+  }
+  .screen {
+    background: var(--screen);
+    border-radius: 8px;
+    height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .screen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 20%, rgba(57,255,20,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* ---- VIEWS ---- */
+  .view { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column; }
+  .view.active { display: flex; }
+
+  /* -- PET VIEW -- */
+  #view-pet { gap: 8px; }
+  .pet-scene {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pet-ground {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 40px;
+    background: repeating-linear-gradient(90deg, #0d2b0d 0px, #0d2b0d 8px, #0a230a 8px, #0a230a 16px);
+    border-top: 2px solid #1a4a1a;
+  }
+  .pet-sprite {
+    position: relative;
+    z-index: 2;
+    image-rendering: pixelated;
+    animation: pet-idle 0.8s steps(2) infinite;
+    cursor: pointer;
+    user-select: none;
+    filter: drop-shadow(0 4px 0 rgba(0,0,0,0.5));
+  }
+  @keyframes pet-idle {
+    0%   { transform: translateY(0px); }
+    50%  { transform: translateY(-4px); }
+    100% { transform: translateY(0px); }
+  }
+  .pet-sprite.eating  { animation: pet-eat 0.3s steps(2) infinite; }
+  .pet-sprite.playing { animation: pet-play 0.4s steps(4) infinite; }
+  .pet-sprite.sad     { animation: pet-sad 1.5s ease-in-out infinite; }
+  .pet-sprite.sick    { animation: pet-sick 0.5s ease-in-out infinite; filter: drop-shadow(0 0 6px #9b4dff); }
+  .pet-sprite.dead    { animation: none; filter: grayscale(1) brightness(0.4); }
+  @keyframes pet-eat   { 0%{transform:translateY(0) scaleY(1)} 50%{transform:translateY(2px) scaleY(0.95)} }
+  @keyframes pet-play  { 0%{transform:rotate(-10deg)} 25%{transform:rotate(10deg) translateY(-6px)} 50%{transform:rotate(-5deg) translateY(-2px)} 75%{transform:rotate(5deg) translateY(-8px)} }
+  @keyframes pet-sad   { 0%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(2px) rotate(3deg)} }
+  @keyframes pet-sick  { 0%{transform:translateX(0)} 25%{transform:translateX(-3px)} 75%{transform:translateX(3px)} }
+
+  .pet-emoji { font-size: 80px; line-height: 1; }
+
+  .speech-bubble {
+    position: absolute;
+    top: 14px; left: 50%;
+    transform: translateX(-50%);
+    background: #0d2b0d;
+    border: 2px solid var(--glow);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 14px;
+    color: var(--glow);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 10;
+    max-width: 200px;
+    text-align: center;
+    white-space: normal;
+  }
+  .speech-bubble.show { opacity: 1; }
+  .speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -8px; left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: var(--glow);
+  }
+
+  /* decorative pixels on screen */
+  .pixel-deco {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--glow);
+    opacity: 0.15;
+  }
+
+  /* -- STATS VIEW -- */
+  #view-stats {
+    padding: 14px;
+    width: 100%;
+    height: 100%;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+  .stat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .stat-label {
+    font-size: 14px;
+    color: var(--textdim);
+    min-width: 70px;
+  }
+  .stat-bar-bg {
+    flex: 1;
+    height: 14px;
+    background: #0a1a0a;
+    border: 1px solid #1a3a1a;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .stat-bar {
+    height: 100%;
+    transition: width 0.4s ease;
+    position: relative;
+  }
+  .stat-bar.hunger  { background: var(--amber); box-shadow: 0 0 4px var(--amber); }
+  .stat-bar.happy   { background: var(--pink);  box-shadow: 0 0 4px var(--pink); }
+  .stat-bar.energy  { background: var(--glow2); box-shadow: 0 0 4px var(--glow2); }
+  .stat-bar.health  { background: var(--glow);  box-shadow: 0 0 4px var(--glow); }
+  .stat-bar.hygiene { background: var(--purple);box-shadow: 0 0 4px var(--purple); }
+  .stat-val {
+    font-size: 16px;
+    min-width: 28px;
+    text-align: right;
+    color: var(--text);
+  }
+
+  .stats-header {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px;
+    color: var(--glow);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    align-self: flex-start;
+  }
+
+  .age-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 14px;
+    color: var(--textdim);
+    border-top: 1px solid #1a3a1a;
+    padding-top: 6px;
+    margin-top: 2px;
+  }
+  .age-row span { color: var(--text); }
+
+  /* -- MINIGAME VIEW (Snake) -- */
+  #view-game {
+    padding: 8px;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .game-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px;
+    color: var(--amber);
+    letter-spacing: 1px;
+  }
+  #snake-canvas {
+    border: 2px solid #1a3a1a;
+    image-rendering: pixelated;
+    background: #060e06;
+  }
+  .game-score {
+    font-size: 18px;
+    color: var(--glow);
+  }
+  .game-msg {
+    font-size: 16px;
+    color: var(--text);
+    text-align: center;
+  }
+
+  /* -- SHOP VIEW -- */
+  #view-shop {
+    padding: 10px;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    height: 100%;
+    justify-content: flex-start;
+    overflow-y: auto;
+  }
+  .shop-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px;
+    color: var(--amber);
+    letter-spacing: 1px;
+    align-self: flex-start;
+  }
+  .shop-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    width: 100%;
+  }
+  .shop-item {
+    background: #0a1a0a;
+    border: 1px solid #1a3a1a;
+    border-radius: 6px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .shop-item:hover { background: #0d230d; border-color: var(--glow); }
+  .shop-item:active { transform: scale(0.97); }
+  .shop-item .item-icon { font-size: 28px; }
+  .shop-item .item-name { font-size: 13px; color: var(--text); }
+  .shop-item .item-cost { font-size: 12px; color: var(--amber); }
+  .shop-item .item-desc { font-size: 11px; color: var(--textdim); text-align: center; }
+
+  .coins-display {
+    font-size: 16px;
+    color: var(--amber);
+    align-self: flex-end;
+  }
+
+  /* ---- STAT BAR BOTTOM ---- */
+  .quick-stats {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding: 6px 8px;
+    background: #0a1208;
+    border: 1px solid #1a3010;
+    border-radius: 6px;
+  }
+  .qs { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; }
+  .qs-icon { font-size: 14px; }
+  .qs-bar-bg { width: 100%; height: 6px; background: #060e06; border-radius: 2px; overflow: hidden; }
+  .qs-bar { height: 100%; border-radius: 2px; transition: width 0.4s; }
+
+  /* ---- BUTTONS ---- */
+  .btn-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+  .btn {
+    background: #0d1f0d;
+    border: 2px solid #1e3a1e;
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'VT323', monospace;
+    font-size: 13px;
+    padding: 8px 4px;
+    cursor: pointer;
+    transition: all 0.1s;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    line-height: 1;
+    user-select: none;
+  }
+  .btn:hover { background: #122012; border-color: var(--glow); color: var(--glow); }
+  .btn:active { transform: translateY(2px) scale(0.97); }
+  .btn .btn-icon { font-size: 20px; }
+  .btn.nav-active { border-color: var(--glow); background: #0f280f; color: var(--glow); box-shadow: 0 0 6px rgba(57,255,20,0.2); }
+  .btn.action-btn { border-color: #1e3a30; }
+  .btn.action-btn:hover { border-color: var(--glow2); color: var(--glow2); }
+  .btn.danger:hover { border-color: var(--red); color: var(--red); }
+
+  .nav-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 8px; }
+  .action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+
+  /* ---- NOTIFICATIONS ---- */
+  .notif {
+    position: fixed;
+    bottom: 20px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #0d1f0d;
+    border: 2px solid var(--glow);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 16px;
+    color: var(--glow);
+    z-index: 100;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .notif.show { transform: translateX(-50%) translateY(0); }
+
+  /* ---- MODAL (game over, etc) ---- */
+  .modal-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 50;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    border-radius: 8px;
+    gap: 10px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    color: var(--glow);
+    text-align: center;
+  }
+  .modal-sub {
+    font-size: 18px;
+    color: var(--textdim);
+    text-align: center;
+  }
+  .modal-btn {
+    background: #0d280d;
+    border: 2px solid var(--glow);
+    color: var(--glow);
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    padding: 6px 20px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.1s;
+  }
+  .modal-btn:hover { background: #163016; }
+
+  /* ---- FOOTER ---- */
+  .device-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    gap: 16px;
+  }
+  .d-btn {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #1a2e1a;
+    border: 1px solid #2a4a2a;
+  }
+
+  /* ---- COIN FLASH ---- */
+  .coin-flash {
+    position: absolute;
+    font-size: 18px;
+    color: var(--amber);
+    pointer-events: none;
+    animation: coin-up 1s ease forwards;
+    z-index: 20;
+  }
+  @keyframes coin-up {
+    0%   { opacity:1; transform: translateY(0); }
+    100% { opacity:0; transform: translateY(-60px); }
+  }
+
+  /* ---- POOP ICON ---- */
+  .poop { position: absolute; font-size: 22px; cursor: pointer; z-index: 5; bottom: 45px; }
+  .poop:hover { transform: scale(1.2); }
+
+  /* ---- WEATHER/ENV ---- */
+  .env-bar {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--textdim);
+    padding: 0 4px;
+    margin-bottom: 6px;
+  }
+  .env-bar .time { color: var(--glow2); font-size: 14px; }
+  .env-bar .day  { color: var(--amber); }
+
+  /* scrollbar for shop */
+  #view-shop::-webkit-scrollbar { width: 4px; }
+  #view-shop::-webkit-scrollbar-track { background: #060e06; }
+  #view-shop::-webkit-scrollbar-thumb { background: #1a3a1a; border-radius: 2px; }
+
+  /* pixel corners on device */
+  .device::before, .device::after {
+    content: '';
+    position: absolute;
+    width: 8px; height: 8px;
+    background: var(--bg);
+  }
+  .device::before { top: -3px; left: -3px; }
+  .device::after  { top: -3px; right: -3px; }
+
+  @media (max-width: 460px) {
+    .btn { font-size: 11px; padding: 6px 2px; }
+    .btn .btn-icon { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>BITPET</h1>
+  <div class="sub">► VIRTUAL PET SYS v1.0 ◄</div>
+</div>
+
+<div class="device">
+  <div class="device-top">
+    <div class="device-name">BITPET-01</div>
+    <div class="status-lights">
+      <span class="on" id="light-power"></span>
+      <span id="light-alert"></span>
+      <span id="light-game"></span>
+    </div>
+  </div>
+
+  <div class="env-bar">
+    <span class="time" id="clock">00:00</span>
+    <span id="pet-name-display">???</span>
+    <span class="day" id="day-counter">DÍA 1</span>
+  </div>
+
+  <!-- Quick stats -->
+  <div class="quick-stats">
+    <div class="qs">
+      <span class="qs-icon">🍔</span>
+      <div class="qs-bar-bg"><div class="qs-bar" id="qs-hunger" style="background:var(--amber);width:80%"></div></div>
+    </div>
+    <div class="qs">
+      <span class="qs-icon">😊</span>
+      <div class="qs-bar-bg"><div class="qs-bar" id="qs-happy" style="background:var(--pink);width:80%"></div></div>
+    </div>
+    <div class="qs">
+      <span class="qs-icon">⚡</span>
+      <div class="qs-bar-bg"><div class="qs-bar" id="qs-energy" style="background:var(--glow2);width:80%"></div></div>
+    </div>
+    <div class="qs">
+      <span class="qs-icon">❤️</span>
+      <div class="qs-bar-bg"><div class="qs-bar" id="qs-health" style="background:var(--glow);width:80%"></div></div>
+    </div>
+    <div class="qs">
+      <span class="qs-icon">🚿</span>
+      <div class="qs-bar-bg"><div class="qs-bar" id="qs-hygiene" style="background:var(--purple);width:80%"></div></div>
+    </div>
+    <div class="qs">
+      <span class="qs-icon">🪙</span>
+      <div class="qs-bar-bg"><div class="qs-bar" id="qs-coins" style="background:var(--amber);width:50%"></div></div>
+    </div>
+  </div>
+
+  <!-- Screen -->
+  <div class="screen-outer">
+    <div class="screen" id="screen">
+
+      <!-- Decorative pixels -->
+      <div class="pixel-deco" style="top:10px;left:10px"></div>
+      <div class="pixel-deco" style="top:10px;right:10px"></div>
+      <div class="pixel-deco" style="bottom:10px;left:10px"></div>
+      <div class="pixel-deco" style="bottom:10px;right:10px"></div>
+
+      <!-- === PET VIEW === -->
+      <div class="view active" id="view-pet">
+        <div class="pet-scene">
+          <div class="speech-bubble" id="bubble">¡Hola!</div>
+          <div class="pet-sprite" id="pet-sprite" onclick="petTap()">
+            <div class="pet-emoji" id="pet-emoji">🐣</div>
+          </div>
+          <div id="poop-container"></div>
+          <div class="pet-ground"></div>
+        </div>
+      </div>
+
+      <!-- === STATS VIEW === -->
+      <div class="view" id="view-stats">
+        <div class="stats-header">► ESTADO DE TU PET</div>
+        <div class="stat-row">
+          <span class="stat-label">🍔 HAMBRE</span>
+          <div class="stat-bar-bg"><div class="stat-bar hunger" id="bar-hunger" style="width:80%"></div></div>
+          <span class="stat-val" id="val-hunger">80</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">😊 FELIZ</span>
+          <div class="stat-bar-bg"><div class="stat-bar happy" id="bar-happy" style="width:80%"></div></div>
+          <span class="stat-val" id="val-happy">80</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">⚡ ENERGÍA</span>
+          <div class="stat-bar-bg"><div class="stat-bar energy" id="bar-energy" style="width:80%"></div></div>
+          <span class="stat-val" id="val-energy">80</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">❤️ SALUD</span>
+          <div class="stat-bar-bg"><div class="stat-bar health" id="bar-health" style="width:80%"></div></div>
+          <span class="stat-val" id="val-health">80</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">🚿 HIGIENE</span>
+          <div class="stat-bar-bg"><div class="stat-bar hygiene" id="bar-hygiene" style="width:80%"></div></div>
+          <span class="stat-val" id="val-hygiene">80</span>
+        </div>
+        <div class="age-row">
+          <div>EDAD: <span id="pet-age">0</span> días</div>
+          <div>PESO: <span id="pet-weight">10</span> kg</div>
+          <div>XP: <span id="pet-xp">0</span></div>
+        </div>
+      </div>
+
+      <!-- === SNAKE MINIGAME VIEW === -->
+      <div class="view" id="view-game">
+        <div class="game-title">► SNAKE FRENZY</div>
+        <canvas id="snake-canvas" width="200" height="160"></canvas>
+        <div style="display:flex;gap:16px;align-items:center;">
+          <div class="game-score">🪙 <span id="snake-score">0</span></div>
+          <div class="game-msg" id="game-msg">Pulsa JUGAR</div>
+        </div>
+        <div class="modal-overlay" id="snake-modal">
+          <div class="modal-title">GAME OVER</div>
+          <div class="modal-sub" id="snake-result">Score: 0</div>
+          <button class="modal-btn" onclick="snakeStart()">JUGAR DE NUEVO</button>
+        </div>
+      </div>
+
+      <!-- === SHOP VIEW === -->
+      <div class="view" id="view-shop">
+        <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
+          <div class="shop-title">► TIENDA</div>
+          <div class="coins-display">🪙 <span id="shop-coins">0</span></div>
+        </div>
+        <div class="shop-grid" id="shop-grid"></div>
+      </div>
+
+    </div>
+  </div><!-- /screen-outer -->
+
+  <!-- NAV buttons -->
+  <div class="nav-grid">
+    <button class="btn nav-active" id="nav-pet" onclick="switchView('pet')">
+      <span class="btn-icon">🐣</span>PET
+    </button>
+    <button class="btn" id="nav-stats" onclick="switchView('stats')">
+      <span class="btn-icon">📊</span>STATS
+    </button>
+    <button class="btn" id="nav-game" onclick="switchView('game')">
+      <span class="btn-icon">🎮</span>JUEGO
+    </button>
+    <button class="btn" id="nav-shop" onclick="switchView('shop')">
+      <span class="btn-icon">🛒</span>TIENDA
+    </button>
+  </div>
+
+  <!-- ACTION buttons -->
+  <div class="action-grid">
+    <button class="btn action-btn" onclick="feedPet()">
+      <span class="btn-icon">🍖</span>COMER
+    </button>
+    <button class="btn action-btn" onclick="playPet()">
+      <span class="btn-icon">⚽</span>JUGAR
+    </button>
+    <button class="btn action-btn" onclick="sleepPet()">
+      <span class="btn-icon">💤</span>DORMIR
+    </button>
+    <button class="btn action-btn" onclick="cleanPet()">
+      <span class="btn-icon">🚿</span>LIMPIAR
+    </button>
+  </div>
+
+  <div class="device-footer">
+    <div class="d-btn"></div>
+    <div class="d-btn"></div>
+    <div class="d-btn"></div>
+  </div>
+</div>
+
+<!-- Notification toast -->
+<div class="notif" id="notif"></div>
+
+<script>
+// ============================================================
+//  GAME STATE
+// ============================================================
+const SAVE_KEY = 'bitpet_save';
+
+let pet = {
+  name: 'BITPET',
+  hunger:  80,
+  happy:   80,
+  energy:  80,
+  health:  100,
+  hygiene: 80,
+  age:     0,
+  weight:  10,
+  xp:      0,
+  coins:   30,
+  poop:    0,
+  alive:   true,
+  lastSave: Date.now(),
+  evolution: 0, // 0=egg 1=baby 2=teen 3=adult 4=elder
+};
+
+const EVOLUTIONS = [
+  { emoji: '🥚', name: 'HUEVO',   minAge: 0  },
+  { emoji: '🐣', name: 'BEBÉ',    minAge: 1  },
+  { emoji: '🐥', name: 'POLLUELO',minAge: 5  },
+  { emoji: '🐔', name: 'ADULTO',  minAge: 10 },
+  { emoji: '🦅', name: 'MAESTRO', minAge: 20 },
+];
+
+const SHOP_ITEMS = [
+  { id:'food_basic',  icon:'🍖', name:'Comida',    cost:5,  effect:()=>{ stat('hunger',25); stat('weight',1); }, desc:'+25 hambre' },
+  { id:'food_super',  icon:'🍕', name:'Pizza',     cost:12, effect:()=>{ stat('hunger',50); stat('happy',10); }, desc:'+50 hambre +10 feliz' },
+  { id:'toy_ball',    icon:'⚽', name:'Pelota',    cost:8,  effect:()=>{ stat('happy',20); stat('energy',-10); }, desc:'+20 feliz' },
+  { id:'toy_game',    icon:'🎲', name:'Juguete',   cost:15, effect:()=>{ stat('happy',35); stat('energy',-15); }, desc:'+35 feliz' },
+  { id:'medicine',    icon:'💊', name:'Medicina',  cost:20, effect:()=>{ stat('health',40); }, desc:'+40 salud' },
+  { id:'soap',        icon:'🧴', name:'Jabón',     cost:6,  effect:()=>{ stat('hygiene',50); }, desc:'+50 higiene' },
+  { id:'energy_drink',icon:'⚡', name:'Energía',   cost:10, effect:()=>{ stat('energy',40); }, desc:'+40 energía' },
+  { id:'candy',       icon:'🍬', name:'Caramelo',  cost:3,  effect:()=>{ stat('happy',15); stat('hunger',10); stat('health',-5); }, desc:'+feliz -salud' },
+];
+
+const MESSAGES = {
+  hungry:  ['¡Tengo hambre! 🍔','Necesito comer...','¡Comida POR FAVOR!'],
+  unhappy: ['¡Juega conmigo!','Estoy aburrido...','¡Quiero atención!'],
+  tired:   ['Zzz...','Necesito dormir...','Muy cansado...'],
+  sick:    ['¡Estoy enfermo!','¡Necesito medicina!','Arg... mal...'],
+  dirty:   ['¡Límpame!','¡Necesito un baño!','Estoy sucio...'],
+  full:    ['¡Estoy lleno!','¡No más!','¡Suficiente comida!'],
+  happy:   ['¡Soy feliz!','¡Te quiero!','¡Esto mola!','♥♥♥'],
+  tap:     ['¡Eh!','¡Para!','jiji','¡Hola!','¿Qué hay?'],
+  poop:    ['¡Tengo que hacer algo!','Necesito ir al baño...','Urgente...'],
+  sleep:   ['Buenas noches...','Zzz 💤','Descansando...'],
+  levelup: ['¡HE EVOLUCIONADO!','¡NUEVO NIVEL!'],
+};
+
+// ============================================================
+//  HELPERS
+// ============================================================
+function clamp(v,min=0,max=100){ return Math.max(min,Math.min(max,v)); }
+
+function stat(key, delta) {
+  if (!pet.alive) return;
+  pet[key] = clamp((pet[key]||0) + delta, key==='weight'?1:0, key==='coins'?9999:100);
+}
+
+function showNotif(msg, color='var(--glow)') {
+  const el = document.getElementById('notif');
+  el.textContent = msg;
+  el.style.borderColor = color;
+  el.style.color = color;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(()=> el.classList.remove('show'), 2200);
+}
+
+function showBubble(msg, duration=2000) {
+  const b = document.getElementById('bubble');
+  b.textContent = msg;
+  b.classList.add('show');
+  clearTimeout(b._t);
+  b._t = setTimeout(()=> b.classList.remove('show'), duration);
+}
+
+function randMsg(key) {
+  const arr = MESSAGES[key];
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+// ============================================================
+//  VIEWS
+// ============================================================
+let currentView = 'pet';
+
+function switchView(v) {
+  ['pet','stats','game','shop'].forEach(id => {
+    document.getElementById('view-'+id).classList.remove('active');
+    document.getElementById('nav-'+id)?.classList.remove('nav-active');
+  });
+  document.getElementById('view-'+v).classList.add('active');
+  document.getElementById('nav-'+v)?.classList.add('nav-active');
+  currentView = v;
+
+  if (v === 'stats') updateStats();
+  if (v === 'shop')  renderShop();
+  if (v === 'game')  { document.getElementById('light-game').classList.add('on'); }
+  else               { document.getElementById('light-game').classList.remove('on'); snakeStop(); }
+}
+
+// ============================================================
+//  PET DISPLAY
+// ============================================================
+function updatePetSprite() {
+  const sprite = document.getElementById('pet-sprite');
+  const emoji  = document.getElementById('pet-emoji');
+  sprite.className = 'pet-sprite';
+
+  const ev = EVOLUTIONS[pet.evolution];
+  emoji.textContent = ev.emoji;
+
+  if (!pet.alive) {
+    sprite.classList.add('dead');
+    emoji.textContent = '💀';
+    return;
+  }
+  if (pet.health < 20)   sprite.classList.add('sick');
+  else if (pet.happy < 20)   sprite.classList.add('sad');
+}
+
+function updateHUD() {
+  const bars = ['hunger','happy','energy','health','hygiene'];
+  bars.forEach(k => {
+    const qsEl = document.getElementById('qs-'+k);
+    if (qsEl) qsEl.style.width = pet[k]+'%';
+  });
+  // coins bar (max 200)
+  const cb = document.getElementById('qs-coins');
+  if (cb) cb.style.width = Math.min(100, pet.coins/2)+'%';
+
+  // day
+  document.getElementById('day-counter').textContent = 'DÍA '+pet.age;
+
+  // alerts
+  const alert = pet.hunger<25||pet.happy<25||pet.health<25||pet.energy<15||pet.hygiene<20;
+  const aLight = document.getElementById('light-alert');
+  if (alert) aLight.classList.add('on'); else aLight.classList.remove('on');
+
+  // poop
+  renderPoops();
+}
+
+function renderPoops() {
+  const c = document.getElementById('poop-container');
+  c.innerHTML = '';
+  for (let i=0;i<Math.min(pet.poop,4);i++){
+    const p = document.createElement('div');
+    p.className = 'poop';
+    p.textContent = '💩';
+    p.style.left = (20+i*40)+'px';
+    p.title = 'Limpiar';
+    p.onclick = cleanPoop;
+    c.appendChild(p);
+  }
+}
+
+function updateStats() {
+  ['hunger','happy','energy','health','hygiene'].forEach(k=>{
+    const bar = document.getElementById('bar-'+k);
+    const val = document.getElementById('val-'+k);
+    if (bar) bar.style.width = pet[k]+'%';
+    if (val) val.textContent = Math.round(pet[k]);
+  });
+  document.getElementById('pet-age').textContent    = pet.age;
+  document.getElementById('pet-weight').textContent = Math.round(pet.weight);
+  document.getElementById('pet-xp').textContent     = pet.xp;
+}
+
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('clock').textContent = h+':'+m;
+}
+
+// ============================================================
+//  ACTIONS
+// ============================================================
+function feedPet() {
+  if (!pet.alive) return;
+  if (pet.hunger >= 95) { showBubble(randMsg('full')); showNotif('¡Ya está lleno!', 'var(--amber)'); return; }
+  stat('hunger', 30);
+  stat('weight', 1);
+  stat('energy', 5);
+  stat('xp', 2);
+  stat('coins', 2);
+  animatePet('eating', 1500);
+  showBubble(randMsg('happy'));
+  showNotif('¡Ñam ñam! +30 🍔', 'var(--amber)');
+  spawnCoinAnim();
+  updateHUD();
+  checkEvolution();
+}
+
+function playPet() {
+  if (!pet.alive) return;
+  if (pet.energy < 10) { showBubble(randMsg('tired')); showNotif('¡Sin energía para jugar!','var(--glow2)'); return; }
+  stat('happy', 25);
+  stat('energy', -20);
+  stat('hunger', -10);
+  stat('hygiene', -8);
+  stat('xp', 5);
+  stat('coins', 3);
+  animatePet('playing', 2000);
+  showBubble(randMsg('happy'));
+  showNotif('¡A jugar! +25 😊', 'var(--pink)');
+  spawnCoinAnim();
+  updateHUD();
+  checkEvolution();
+}
+
+function sleepPet() {
+  if (!pet.alive) return;
+  stat('energy', 50);
+  stat('hunger', -15);
+  stat('health', 5);
+  animatePet('idle', 3000);
+  showBubble(randMsg('sleep'));
+  showNotif('Descansando... +50 ⚡', 'var(--glow2)');
+  updateHUD();
+}
+
+function cleanPet() {
+  if (!pet.alive) return;
+  stat('hygiene', 40);
+  stat('happy', 5);
+  pet.poop = 0;
+  showBubble('¡Limpio! 🚿');
+  showNotif('¡Limpio! +40 🚿','var(--purple)');
+  updateHUD();
+}
+
+function cleanPoop() {
+  pet.poop = 0;
+  stat('hygiene', 10);
+  stat('happy', 5);
+  stat('coins', 1);
+  showNotif('¡Popo limpiada! 💩','var(--purple)');
+  updateHUD();
+}
+
+function petTap() {
+  showBubble(randMsg('tap'));
+  stat('happy', 2);
+  updateHUD();
+}
+
+function animatePet(anim, duration) {
+  const sprite = document.getElementById('pet-sprite');
+  sprite.className = 'pet-sprite '+anim;
+  clearTimeout(sprite._at);
+  sprite._at = setTimeout(()=>{ sprite.className='pet-sprite'; updatePetSprite(); }, duration);
+}
+
+function spawnCoinAnim() {
+  const scene = document.getElementById('view-pet');
+  const el = document.createElement('div');
+  el.className = 'coin-flash';
+  el.textContent = '+🪙';
+  el.style.left = (80+Math.random()*80)+'px';
+  el.style.bottom = '80px';
+  scene.appendChild(el);
+  setTimeout(()=> el.remove(), 1000);
+}
+
+// ============================================================
+//  SHOP
+// ============================================================
+function renderShop() {
+  document.getElementById('shop-coins').textContent = Math.round(pet.coins);
+  const grid = document.getElementById('shop-grid');
+  grid.innerHTML = '';
+  SHOP_ITEMS.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'shop-item';
+    el.innerHTML = `<div class="item-icon">${item.icon}</div>
+      <div class="item-name">${item.name}</div>
+      <div class="item-cost">🪙 ${item.cost}</div>
+      <div class="item-desc">${item.desc}</div>`;
+    el.onclick = () => buyItem(item);
+    grid.appendChild(el);
+  });
+}
+
+function buyItem(item) {
+  if (!pet.alive) return;
+  if (pet.coins < item.cost) {
+    showNotif('¡Sin monedas! 🪙','var(--red)');
+    return;
+  }
+  stat('coins', -item.cost);
+  item.effect();
+  showNotif(`${item.icon} ${item.name} comprado!`, 'var(--amber)');
+  renderShop();
+  updateHUD();
+  checkEvolution();
+  switchView('pet');
+  showBubble('¡Gracias! '+item.icon);
+}
+
+// ============================================================
+//  EVOLUTION
+// ============================================================
+function checkEvolution() {
+  const newEv = EVOLUTIONS.findLastIndex(e => pet.age >= e.minAge);
+  if (newEv > pet.evolution) {
+    pet.evolution = newEv;
+    const ev = EVOLUTIONS[newEv];
+    updatePetSprite();
+    document.getElementById('pet-name-display').textContent = ev.name;
+    showBubble(randMsg('levelup'), 3000);
+    showNotif(`¡EVOLUCIÓN! → ${ev.emoji} ${ev.name}`, 'var(--amber)');
+  }
+}
+
+// ============================================================
+//  TICK — passive decay
+// ============================================================
+function gameTick() {
+  if (!pet.alive) return;
+
+  stat('hunger',  -2.5);
+  stat('happy',   -1.5);
+  stat('energy',  -1.2);
+  stat('hygiene', -1.0);
+
+  // health effects
+  if (pet.hunger < 15) stat('health', -3);
+  if (pet.hygiene < 15) stat('health', -2);
+  if (pet.poop > 3)    stat('health', -2);
+  if (pet.hunger > 40 && pet.happy > 40) stat('health', 0.5);
+
+  // random poop
+  if (Math.random() < 0.05 && pet.poop < 5) {
+    pet.poop++;
+    if (currentView === 'pet') showBubble(randMsg('poop'));
+  }
+
+  // earn coins passively
+  if (pet.health > 50) stat('coins', 1);
+
+  // age up every 20 ticks (~2min)
+  pet._ageTick = (pet._ageTick||0) + 1;
+  if (pet._ageTick >= 20) {
+    pet._ageTick = 0;
+    pet.age++;
+    stat('xp', 10);
+    checkEvolution();
+  }
+
+  // random messages
+  if (Math.random() < 0.1 && currentView === 'pet') {
+    if (pet.hunger < 25) showBubble(randMsg('hungry'));
+    else if (pet.happy < 25) showBubble(randMsg('unhappy'));
+    else if (pet.energy < 15) showBubble(randMsg('tired'));
+    else if (pet.health < 25) showBubble(randMsg('sick'));
+    else if (pet.hygiene < 20) showBubble(randMsg('dirty'));
+  }
+
+  // death
+  if (pet.health <= 0) {
+    pet.alive = false;
+    pet.health = 0;
+    updatePetSprite();
+    showBubble('...', 99999);
+    showNotif('💀 Tu pet ha muerto...','var(--red)');
+  }
+
+  updateHUD();
+  updateStats();
+  updatePetSprite();
+  save();
+}
+
+// ============================================================
+//  SAVE / LOAD
+// ============================================================
+function save() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(pet)); } catch(e){}
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (raw) {
+      const saved = JSON.parse(raw);
+      Object.assign(pet, saved);
+    }
+  } catch(e){}
+}
+
+// ============================================================
+//  SNAKE MINIGAME
+// ============================================================
+let snakeLoop = null;
+let snakeState = null;
+
+const SNAKE_CELL = 10;
+const SNAKE_COLS = 20;
+const SNAKE_ROWS = 16;
+
+function snakeInit() {
+  return {
+    snake: [{x:10,y:8},{x:9,y:8},{x:8,y:8}],
+    dir:   {x:1,y:0},
+    next:  {x:1,y:0},
+    food:  snakeRandFood([{x:10,y:8},{x:9,y:8},{x:8,y:8}]),
+    score: 0,
+    over:  false,
+  };
+}
+
+function snakeRandFood(snake) {
+  let f;
+  do {
+    f = { x: Math.floor(Math.random()*SNAKE_COLS), y: Math.floor(Math.random()*SNAKE_ROWS) };
+  } while (snake.some(s=>s.x===f.x&&s.y===f.y));
+  return f;
+}
+
+function snakeStart() {
+  document.getElementById('snake-modal').classList.remove('show');
+  document.getElementById('light-game').classList.add('on');
+  document.getElementById('game-msg').textContent = 'WASD / flechas';
+  snakeState = snakeInit();
+  clearInterval(snakeLoop);
+  snakeLoop = setInterval(snakeTick, 130);
+}
+
+function snakeStop() {
+  clearInterval(snakeLoop);
+  snakeLoop = null;
+}
+
+function snakeTick() {
+  if (!snakeState || snakeState.over) return;
+  const s = snakeState;
+  s.dir = s.next;
+  const head = { x: s.snake[0].x + s.dir.x, y: s.snake[0].y + s.dir.y };
+
+  // wall wrap
+  head.x = (head.x + SNAKE_COLS) % SNAKE_COLS;
+  head.y = (head.y + SNAKE_ROWS) % SNAKE_ROWS;
+
+  // self-collision
+  if (s.snake.some(seg=>seg.x===head.x&&seg.y===head.y)) {
+    s.over = true;
+    snakeGameOver(s.score);
+    return;
+  }
+
+  s.snake.unshift(head);
+
+  if (head.x===s.food.x && head.y===s.food.y) {
+    s.score++;
+    document.getElementById('snake-score').textContent = s.score;
+    s.food = snakeRandFood(s.snake);
+    stat('happy', 5);
+    stat('coins', 2);
+    updateHUD();
+  } else {
+    s.snake.pop();
+  }
+
+  snakeDraw();
+}
+
+function snakeDraw() {
+  const canvas = document.getElementById('snake-canvas');
+  const ctx = canvas.getContext('2d');
+  const s = snakeState;
+
+  ctx.fillStyle = '#060e06';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // grid dots
+  ctx.fillStyle = '#0d200d';
+  for(let x=0;x<SNAKE_COLS;x++)
+    for(let y=0;y<SNAKE_ROWS;y++)
+      ctx.fillRect(x*SNAKE_CELL+4, y*SNAKE_CELL+4, 2, 2);
+
+  // food
+  ctx.fillStyle = '#ff2d78';
+  ctx.shadowColor = '#ff2d78';
+  ctx.shadowBlur = 6;
+  ctx.fillRect(s.food.x*SNAKE_CELL+1, s.food.y*SNAKE_CELL+1, SNAKE_CELL-2, SNAKE_CELL-2);
+  ctx.shadowBlur = 0;
+
+  // snake
+  s.snake.forEach((seg,i)=>{
+    const t = 1 - i/s.snake.length;
+    ctx.fillStyle = i===0 ? '#39ff14' : `rgba(57,255,20,${0.3+t*0.5})`;
+    if (i===0) { ctx.shadowColor='#39ff14'; ctx.shadowBlur=4; }
+    else ctx.shadowBlur=0;
+    ctx.fillRect(seg.x*SNAKE_CELL+1, seg.y*SNAKE_CELL+1, SNAKE_CELL-2, SNAKE_CELL-2);
+  });
+  ctx.shadowBlur = 0;
+}
+
+function snakeGameOver(score) {
+  clearInterval(snakeLoop);
+  const coins = score * 2;
+  stat('coins', coins);
+  stat('happy', score * 3);
+  stat('xp', score * 5);
+  updateHUD();
+  save();
+  document.getElementById('snake-result').textContent = `Score: ${score} | +${coins}🪙`;
+  document.getElementById('snake-modal').classList.add('show');
+}
+
+document.addEventListener('keydown', e => {
+  if (currentView !== 'game' || !snakeState) return;
+  const map = {
+    ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right',
+    w:'up', s:'down', a:'left', d:'right',
+    W:'up', S:'down', A:'left', D:'right',
+  };
+  const dir = map[e.key];
+  if (!dir) return;
+  e.preventDefault();
+  const s = snakeState;
+  if (dir==='up'    && s.dir.y===0) s.next={x:0,y:-1};
+  if (dir==='down'  && s.dir.y===0) s.next={x:0,y:1};
+  if (dir==='left'  && s.dir.x===0) s.next={x:-1,y:0};
+  if (dir==='right' && s.dir.x===0) s.next={x:1,y:0};
+});
+
+// Mobile touch for snake
+let touchStart = null;
+document.getElementById('snake-canvas').addEventListener('touchstart', e=>{
+  touchStart = {x:e.touches[0].clientX, y:e.touches[0].clientY};
+  e.preventDefault();
+},{passive:false});
+document.getElementById('snake-canvas').addEventListener('touchend', e=>{
+  if (!touchStart || !snakeState) return;
+  const dx = e.changedTouches[0].clientX - touchStart.x;
+  const dy = e.changedTouches[0].clientY - touchStart.y;
+  const s = snakeState;
+  if (Math.abs(dx)>Math.abs(dy)){
+    if (dx>0&&s.dir.x===0) s.next={x:1,y:0};
+    else if (dx<0&&s.dir.x===0) s.next={x:-1,y:0};
+  } else {
+    if (dy>0&&s.dir.y===0) s.next={x:0,y:1};
+    else if (dy<0&&s.dir.y===0) s.next={x:0,y:-1};
+  }
+  touchStart=null;
+  e.preventDefault();
+},{passive:false});
+
+// "JUGAR" button in game view
+document.getElementById('game-msg').addEventListener('click', ()=>{
+  if (!snakeLoop) snakeStart();
+});
+
+// ============================================================
+//  INIT
+// ============================================================
+load();
+updatePetSprite();
+updateHUD();
+updateClock();
+document.getElementById('pet-name-display').textContent = EVOLUTIONS[pet.evolution||0].name;
+checkEvolution();
+
+setInterval(gameTick, 6000);      // tick every 6s
+setInterval(updateClock, 10000);
+updateClock();
+
+// Initial greeting
+setTimeout(()=> showBubble('¡Hola! Cuídame bien 🥚', 3000), 800);
+</script>
+</body>
+</html>
