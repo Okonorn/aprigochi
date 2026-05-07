@@ -13,63 +13,88 @@
   --text:#c8ffc8;--textdim:#3a5a3a;--border:#1a2e1a;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{
-  background:var(--bg);font-family:'VT323',monospace;color:var(--text);
-  min-height:100vh;padding:14px 10px 40px;overflow-x:hidden;
-}
-body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
-  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.1) 3px,rgba(0,0,0,0.1) 4px);
-}
+body{background:var(--bg);font-family:'VT323',monospace;color:var(--text);
+  min-height:100vh;padding:14px 10px 40px;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.1) 3px,rgba(0,0,0,0.1) 4px);}
 
-/* HEADER */
-.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:0 2px}
-.logo{font-family:'Press Start 2P',monospace;font-size:clamp(13px,2.8vw,22px);color:var(--glow);
-  text-shadow:0 0 10px var(--glow),0 0 28px rgba(57,255,20,.3);}
-.coin-badge{
-  display:flex;align-items:center;gap:7px;
-  background:#0c180c;border:2px solid var(--amber);border-radius:8px;padding:5px 14px;
-  box-shadow:0 0 12px rgba(255,179,0,.2);
+/* ── STARTER SCREEN ── */
+#starter{
+  position:fixed;inset:0;background:var(--bg);z-index:1000;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;
+  padding:20px;
 }
-.coin-badge .ci{font-size:20px}
-.coin-badge .cv{font-family:'Press Start 2P',monospace;font-size:13px;color:var(--amber)}
+#starter.hidden{display:none}
+.start-logo{font-family:'Press Start 2P',monospace;font-size:clamp(18px,4vw,32px);
+  color:var(--glow);text-shadow:0 0 12px var(--glow),0 0 30px rgba(57,255,20,.3);
+  text-align:center;line-height:1.5;}
+.start-sub{font-size:20px;color:var(--textdim);letter-spacing:2px}
+.start-prompt{font-size:17px;color:var(--text);text-align:center;margin-bottom:4px}
+.starter-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:420px;width:100%}
+.starter-card{
+  background:var(--panel);border:2px solid var(--border);border-radius:12px;
+  padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;
+  cursor:pointer;transition:all .18s;
+}
+.starter-card:hover{border-color:var(--glow);background:#0c1e0c;box-shadow:0 0 14px rgba(57,255,20,.2);transform:translateY(-2px)}
+.starter-card:active{transform:scale(.97)}
+.starter-card img{width:72px;height:72px;image-rendering:pixelated;object-fit:contain}
+.starter-name{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--text)}
+.starter-type{font-size:14px;color:var(--textdim)}
+.starter-card.sel{border-color:var(--amber);box-shadow:0 0 16px rgba(255,179,0,.3)}
+
+/* ── HEADER ── */
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 2px}
+.logo{font-family:'Press Start 2P',monospace;font-size:clamp(13px,2.8vw,20px);color:var(--glow);
+  text-shadow:0 0 10px var(--glow),0 0 28px rgba(57,255,20,.3);}
+.coin-badge{display:flex;align-items:center;gap:7px;
+  background:#0c180c;border:2px solid var(--amber);border-radius:8px;padding:5px 14px;
+  box-shadow:0 0 12px rgba(255,179,0,.2);}
+.coin-badge .ci{font-size:19px}
+.coin-badge .cv{font-family:'Press Start 2P',monospace;font-size:12px;color:var(--amber)}
 .lights{display:flex;gap:5px;align-items:center}
 .light{width:9px;height:9px;border-radius:50%;background:#1a2e1a}
 .light.on{background:var(--glow);box-shadow:0 0 7px var(--glow);animation:blink 2s ease-in-out infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* LAYOUT */
-.layout{
-  display:grid;
-  grid-template-columns:190px 1fr 190px;
-  gap:10px;
-  max-width:940px;margin:0 auto;
+/* ── DAY PROGRESS BAR ── */
+.day-bar-wrap{
+  max-width:940px;margin:0 auto 10px;
+  background:var(--panel);border:2px solid var(--border);border-radius:10px;
+  padding:7px 12px;display:flex;align-items:center;gap:10px;
 }
+.day-label{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--textdim);white-space:nowrap;letter-spacing:1px}
+.day-bg{flex:1;height:14px;background:#060e06;border:1px solid #1a3a1a;border-radius:3px;overflow:hidden;position:relative}
+.day-fill{height:100%;border-radius:3px;transition:width 1s linear;
+  background:linear-gradient(90deg,#0a3a6a,var(--glow2),var(--amber),var(--pink),#4a0a2a);
+  background-size:200% 100%;
+  box-shadow:0 0 6px rgba(0,229,255,.4);}
+.day-phase{font-size:14px;color:var(--glow2);white-space:nowrap;min-width:70px;text-align:right}
+.day-num{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--amber);white-space:nowrap}
+
+/* ── LAYOUT ── */
+.layout{display:grid;grid-template-columns:190px 1fr 190px;gap:10px;max-width:940px;margin:0 auto;}
 @media(max-width:700px){
   .layout{grid-template-columns:1fr}
   .col-l,.col-r{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .col-c{order:-1}
 }
 
-/* PANELS */
+/* ── PANELS ── */
 .panel{background:var(--panel);border:2px solid var(--border);border-radius:12px;padding:10px}
-.ptitle{
-  font-family:'Press Start 2P',monospace;font-size:7px;color:var(--glow);
-  letter-spacing:1px;margin-bottom:9px;
-}
+.ptitle{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--glow);
+  letter-spacing:1px;margin-bottom:9px;}
 .ptitle::before{content:'► '}
 
-/* SCREEN */
+/* ── SCREEN ── */
 .sw{background:#050d05;border:3px solid #142214;border-radius:13px;padding:4px;
   box-shadow:inset 0 0 30px rgba(0,0,0,.9),0 0 18px rgba(57,255,20,.06);}
 .screen{background:var(--screen);border-radius:9px;height:330px;
   position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
-.screen::after{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse at 35% 15%,rgba(57,255,20,.05) 0%,transparent 55%);
-}
+.screen::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 35% 15%,rgba(57,255,20,.05) 0%,transparent 55%);}
 
-/* VIEWS */
+/* ── VIEWS ── */
 .view{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column}
 .view.active{display:flex}
 
@@ -83,47 +108,43 @@ body::before{
 .pet-wrap{position:relative;z-index:2;cursor:pointer;user-select:none;
   display:flex;align-items:flex-end;justify-content:center}
 
-.pet-img{
-  image-rendering:pixelated;width:96px;height:96px;object-fit:contain;
-  filter:drop-shadow(0 7px 0 rgba(0,0,0,.6));
-  animation:idle 1.1s ease-in-out infinite;
-}
-.pet-img.big{width:118px;height:118px}
-.pet-img.giant{width:142px;height:142px}
+/* PET IMG */
+.pet-img{image-rendering:pixelated;width:96px;height:96px;object-fit:contain;
+  filter:drop-shadow(0 7px 0 rgba(0,0,0,.6));animation:idle 1.1s ease-in-out infinite;}
+.pet-img.big{width:118px;height:118px}.pet-img.giant{width:142px;height:142px}
 @keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 @keyframes eat{0%,100%{transform:scaleY(1) translateY(0)}50%{transform:scaleY(.9) translateY(5px)}}
-@keyframes play{
-  0%{transform:rotate(-12deg) translateY(0)}
-  25%{transform:rotate(12deg) translateY(-12px)}
-  50%{transform:rotate(-5deg) translateY(-4px)}
-  75%{transform:rotate(9deg) translateY(-14px)}
-  100%{transform:rotate(-12deg) translateY(0)}
-}
-@keyframes sad{0%,100%{transform:rotate(-5deg) translateY(0)}50%{transform:rotate(5deg) translateY(4px)}}
+@keyframes play{0%{transform:rotate(-12deg)}25%{transform:rotate(12deg) translateY(-12px)}50%{transform:rotate(-5deg) translateY(-4px)}75%{transform:rotate(9deg) translateY(-14px)}100%{transform:rotate(-12deg)}}
+@keyframes sad{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg) translateY(4px)}}
 @keyframes sick{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-@keyframes evoflash{0%{filter:brightness(4)}100%{filter:drop-shadow(0 7px 0 rgba(0,0,0,.6))}}
-.pet-img.anim-eat   {animation:eat  .38s steps(2) infinite}
-.pet-img.anim-play  {animation:play .55s ease-in-out infinite}
-.pet-img.anim-sad   {animation:sad  1.9s ease-in-out infinite}
-.pet-img.anim-sick  {animation:sick .48s ease-in-out infinite;filter:drop-shadow(0 0 10px #a259ff)}
-.pet-img.anim-dead  {animation:none;filter:grayscale(1) brightness(.3)}
-.pet-img.evolving   {animation:evoflash .4s ease 4}
+@keyframes evoflash{0%{filter:brightness(5) saturate(0)}100%{filter:drop-shadow(0 7px 0 rgba(0,0,0,.6))}}
+.pet-img.anim-eat{animation:eat .38s steps(2) infinite}
+.pet-img.anim-play{animation:play .55s ease-in-out infinite}
+.pet-img.anim-sad{animation:sad 1.9s ease-in-out infinite}
+.pet-img.anim-sick{animation:sick .48s ease-in-out infinite;filter:drop-shadow(0 0 10px #a259ff)}
+.pet-img.anim-dead{animation:none;filter:grayscale(1) brightness(.3)}
+.pet-img.evolving{animation:evoflash .5s ease 3}
 
-.bubble{
-  position:absolute;top:12px;left:50%;transform:translateX(-50%);
+/* SPEECH BUBBLE */
+.bubble{position:absolute;top:12px;left:50%;transform:translateX(-50%);
   background:#071407;border:2px solid var(--glow);border-radius:8px;
   padding:5px 13px;font-size:15px;color:var(--glow);
-  opacity:0;transition:opacity .2s;z-index:10;
-  max-width:230px;text-align:center;white-space:normal;
-  box-shadow:0 0 12px rgba(57,255,20,.2);
-}
+  opacity:0;transition:opacity .2s;z-index:10;max-width:230px;text-align:center;
+  box-shadow:0 0 12px rgba(57,255,20,.2);}
 .bubble.show{opacity:1}
 .bubble::after{content:'';position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);
   border:5px solid transparent;border-top-color:var(--glow);}
 
+/* POOP */
 .poop-layer{position:absolute;bottom:46px;right:8px;display:flex;gap:3px;z-index:5}
-.pi{font-size:19px;cursor:pointer;transition:transform .15s}
-.pi:hover{transform:scale(1.3)}
+.pi{font-size:19px;cursor:pointer;transition:transform .15s}.pi:hover{transform:scale(1.3)}
+
+/* COSMETIC ITEMS ON SCENE */
+.scene-item{position:absolute;z-index:3;image-rendering:pixelated;object-fit:contain;pointer-events:none;}
+.scene-item.slot-hat   {width:40px;height:40px;bottom:calc(46px + var(--pet-h,96px) - 10px);left:50%;transform:translateX(-50%)}
+.scene-item.slot-ground{width:44px;height:44px;bottom:46px;left:calc(50% - 70px)}
+.scene-item.slot-bg    {width:60px;height:60px;top:14px;right:12px;opacity:.7}
+.scene-item.slot-badge {width:36px;height:36px;bottom:calc(46px + 4px);left:calc(50% + 30px)}
 
 /* STATS VIEW */
 #view-stats{padding:14px 16px;justify-content:flex-start;gap:9px;width:100%;height:100%}
@@ -132,9 +153,9 @@ body::before{
 .sbg{flex:1;height:16px;background:#060e06;border:1px solid #1a3a1a;border-radius:3px;overflow:hidden}
 .sb{height:100%;border-radius:3px;transition:width .4s ease}
 .sb.hunger{background:var(--amber);box-shadow:0 0 5px var(--amber)}
-.sb.happy {background:var(--pink); box-shadow:0 0 5px var(--pink)}
+.sb.happy{background:var(--pink);box-shadow:0 0 5px var(--pink)}
 .sb.energy{background:var(--glow2);box-shadow:0 0 5px var(--glow2)}
-.sb.health{background:var(--glow); box-shadow:0 0 5px var(--glow)}
+.sb.health{background:var(--glow);box-shadow:0 0 5px var(--glow)}
 .sb.hygiene{background:var(--purple);box-shadow:0 0 5px var(--purple)}
 .sv{font-size:17px;min-width:30px;text-align:right}
 .sinfo2{display:flex;justify-content:space-around;font-size:14px;color:var(--textdim);
@@ -145,43 +166,47 @@ body::before{
 #view-game{padding:10px;flex-direction:column;gap:6px}
 .gt{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--amber);letter-spacing:1px}
 #snake-cv{border:2px solid #1a3a1a;image-rendering:pixelated;background:#040c04}
-.gsc{font-size:20px;color:var(--glow)}
-.gmsg{font-size:17px;color:var(--text);cursor:pointer}
+.gsc{font-size:20px;color:var(--glow)}.gmsg{font-size:17px;color:var(--text);cursor:pointer}
 
 /* SHOP */
 #view-shop{padding:10px;flex-direction:column;gap:7px;width:100%;height:100%;
-  justify-content:flex-start;overflow-y:auto}
+  justify-content:flex-start;overflow-y:auto;}
 #view-shop::-webkit-scrollbar{width:4px}
 #view-shop::-webkit-scrollbar-thumb{background:#1a3a1a;border-radius:2px}
 .shop-hdr{display:flex;justify-content:space-between;align-items:center;width:100%}
 .shop-cb{font-size:18px;color:var(--amber)}
 .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;width:100%}
-.sitem{background:#090f09;border:1px solid #1a3a1a;border-radius:8px;
+.sitem{background:#090f09;border:2px solid #1a3a1a;border-radius:8px;
   padding:8px 6px;display:flex;flex-direction:column;align-items:center;gap:3px;
-  cursor:pointer;transition:border-color .15s,background .15s}
+  cursor:pointer;transition:border-color .15s,background .15s;position:relative;}
 .sitem:hover{background:#0c1a0c;border-color:var(--glow)}
 .sitem:active{transform:scale(.97)}
-.si-ic{font-size:26px}.si-nm{font-size:14px}.si-co{font-size:13px;color:var(--amber)}.si-de{font-size:12px;color:var(--textdim);text-align:center}
+.sitem.owned{border-color:var(--amber);background:#0e1a08;}
+.sitem.equipped{border-color:var(--glow);background:#0c200c;box-shadow:0 0 8px rgba(57,255,20,.2);}
+.sitem.equipped::after{content:'EQ';position:absolute;top:4px;right:5px;
+  font-size:9px;color:var(--glow);font-family:'Press Start 2P',monospace;}
+.si-sprite{width:48px;height:48px;image-rendering:pixelated;object-fit:contain}
+.si-nm{font-size:13px;color:var(--text);text-align:center}
+.si-co{font-size:13px;color:var(--amber)}
+.si-de{font-size:11px;color:var(--textdim);text-align:center}
+.si-slot{font-size:10px;color:var(--purple)}
 
 /* MODAL */
 .mov{display:none;position:absolute;inset:0;background:rgba(0,0,0,.88);z-index:50;
   align-items:center;justify-content:center;flex-direction:column;border-radius:9px;gap:12px}
 .mov.show{display:flex}
-.mt{font-family:'Press Start 2P',monospace;font-size:12px;color:var(--glow);text-align:center}
+.mt{font-family:'Press Start 2P',monospace;font-size:11px;color:var(--glow);text-align:center;line-height:1.6}
 .ms{font-size:18px;color:var(--textdim);text-align:center}
 .mbtn{background:#0a1a0a;border:2px solid var(--glow);color:var(--glow);
   font-family:'VT323',monospace;font-size:20px;padding:7px 22px;cursor:pointer;border-radius:7px}
 .mbtn:hover{background:#122012}
 
-/* HUD bar under screen */
+/* HUD */
 .shud{display:flex;justify-content:space-between;padding:4px 2px 0;font-size:14px;color:var(--textdim)}
-.shud-c{color:var(--glow2);font-size:15px}
-.shud-n{color:var(--text);font-size:15px}
-.shud-d{color:var(--amber);font-size:15px}
+.shud-c{color:var(--glow2);font-size:15px}.shud-n{color:var(--text);font-size:15px}.shud-d{color:var(--amber);font-size:15px}
 
-/* NAV / ACTIONS */
+/* NAV */
 .nbr{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:8px}
-.abr{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:7px}
 .btn{background:#0a140a;border:2px solid #1a2e1a;border-radius:9px;
   color:var(--text);font-family:'VT323',monospace;font-size:13px;
   padding:9px 4px;cursor:pointer;transition:all .1s;
@@ -190,8 +215,7 @@ body::before{
 .btn:active{transform:translateY(2px) scale(.97)}
 .btn .bi{font-size:20px}
 .btn.non{border-color:var(--glow);background:#0e200e;color:var(--glow);box-shadow:0 0 8px rgba(57,255,20,.18)}
-.btn.act{border-color:#1a3028}
-.btn.act:hover{border-color:var(--glow2);color:var(--glow2)}
+.btn.act{border-color:#1a3028}.btn.act:hover{border-color:var(--glow2);color:var(--glow2)}
 
 /* LEFT mini stats */
 .mst{display:flex;align-items:center;gap:6px;margin-bottom:6px}
@@ -203,32 +227,26 @@ body::before{
 /* EVO TREE */
 .etree{display:flex;flex-direction:column;gap:5px;width:100%}
 .eitem{display:flex;align-items:center;gap:7px;padding:5px 6px;
-  border:1px solid #1a2e1a;border-radius:7px;background:#090f09;transition:border-color .2s}
+  border:1px solid #1a2e1a;border-radius:7px;background:#090f09;}
 .eitem.cur{border-color:var(--glow);background:#0c1e0c;box-shadow:0 0 8px rgba(57,255,20,.15)}
-.eitem.locked{opacity:.32}
-.eitem.done{opacity:.65}
+.eitem.locked{opacity:.32}.eitem.done{opacity:.65}
 .esp{width:38px;height:38px;image-rendering:pixelated;object-fit:contain}
-.ein{flex:1}
-.enm{font-size:14px;color:var(--text)}
-.ereq{font-size:11px;color:var(--textdim)}
-.ebadge{font-size:9px;padding:2px 5px;border-radius:4px;background:#0a1a0a;border:1px solid var(--glow);color:var(--glow)}
+.ein{flex:1}.enm{font-size:13px;color:var(--text)}.ereq{font-size:11px;color:var(--textdim)}
+.ebadge{font-size:8px;padding:2px 5px;border-radius:4px;background:#0a1a0a;border:1px solid var(--glow);color:var(--glow)}
 .earrow{width:1px;height:10px;background:var(--border);margin:0 auto}
 
 /* COIN FLOAT */
-.cf{position:fixed;font-size:20px;color:var(--amber);pointer-events:none;z-index:200;
-  animation:cfloat 1s ease forwards}
+.cf{position:fixed;font-size:20px;color:var(--amber);pointer-events:none;z-index:200;animation:cfloat 1s ease forwards}
 @keyframes cfloat{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-70px)}}
 
 /* NOTIF */
-.notif{position:fixed;bottom:20px;left:50%;
-  transform:translateX(-50%) translateY(90px);transition:transform .3s ease;
+.notif{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(90px);transition:transform .3s ease;
   background:#091409;border:2px solid var(--glow);border-radius:9px;
-  padding:9px 20px;font-size:17px;color:var(--glow);z-index:300;
-  white-space:nowrap;pointer-events:none}
+  padding:9px 20px;font-size:17px;color:var(--glow);z-index:300;white-space:nowrap;pointer-events:none}
 .notif.show{transform:translateX(-50%) translateY(0)}
 
 /* DEAD */
-#dead-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:500;
+#dead-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:500;
   align-items:center;justify-content:center;flex-direction:column;gap:14px}
 #dead-ov.show{display:flex}
 .dov-t{font-family:'Press Start 2P',monospace;font-size:16px;color:var(--red);text-align:center;line-height:1.6}
@@ -237,11 +255,29 @@ body::before{
 </head>
 <body>
 
+<!-- ══════════════════════════════════════════
+     STARTER SELECTION SCREEN
+══════════════════════════════════════════ -->
+<div id="starter">
+  <div class="start-logo">POKÉPET</div>
+  <div class="start-sub">► VIRTUAL PET v2.0 ◄</div>
+  <div class="start-prompt">Elige tu compañero de inicio:</div>
+  <div class="starter-grid" id="starter-grid"></div>
+  <button class="mbtn" id="start-btn" onclick="confirmStarter()" style="opacity:.4;pointer-events:none">
+    ► COMENZAR
+  </button>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MAIN GAME UI
+══════════════════════════════════════════ -->
+<div id="game-ui" style="display:none">
+
 <!-- HEADER -->
 <div class="hdr">
   <div class="logo">POKÉPET</div>
   <div class="lights">
-    <div class="light on" id="l-power"></div>
+    <div class="light on"></div>
     <div class="light" id="l-alert"></div>
     <div class="light" id="l-game"></div>
   </div>
@@ -251,12 +287,20 @@ body::before{
   </div>
 </div>
 
+<!-- DAY PROGRESS BAR -->
+<div class="day-bar-wrap">
+  <span class="day-num" id="day-num">DÍA 1</span>
+  <div class="day-bg">
+    <div class="day-fill" id="day-fill" style="width:0%"></div>
+  </div>
+  <span class="day-phase" id="day-phase">🌅 ALBA</span>
+</div>
+
 <!-- 3-COLUMN LAYOUT -->
 <div class="layout">
 
   <!-- LEFT -->
   <div class="col-l" style="display:flex;flex-direction:column;gap:10px">
-
     <div class="panel">
       <div class="ptitle">STATS</div>
       <div class="mst"><span class="mst-l" title="Hambre">🍔</span><div class="mst-bg"><div class="mst-b" id="mb-hunger" style="background:var(--amber);width:80%"></div></div><span class="mst-v" id="mv-hunger">80</span></div>
@@ -268,10 +312,9 @@ body::before{
         display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--textdim)">
         <div>EDAD <span style="color:var(--text)" id="s-age">0</span>d</div>
         <div>PESO <span style="color:var(--text)" id="s-weight">10</span>kg</div>
-        <div>XP   <span style="color:var(--text)" id="s-xp">0</span></div>
+        <div>XP &nbsp;&nbsp;<span style="color:var(--text)" id="s-xp">0</span></div>
       </div>
     </div>
-
     <div class="panel">
       <div class="ptitle">ACCIONES</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
@@ -281,26 +324,24 @@ body::before{
         <button class="btn act" onclick="cleanPet()"><span class="bi">🚿</span>LIMPIAR</button>
       </div>
     </div>
-
   </div>
 
   <!-- CENTRE -->
   <div class="col-c" style="display:flex;flex-direction:column;gap:7px">
-
     <div class="shud">
       <span class="shud-c" id="clock">00:00</span>
       <span class="shud-n" id="evo-hud">???</span>
       <span class="shud-d" id="day-hud">DÍA 1</span>
     </div>
-
     <div class="sw">
       <div class="screen" id="screen">
 
-        <!-- PET -->
+        <!-- PET VIEW -->
         <div class="view active" id="view-pet">
-          <div class="pet-scene">
+          <div class="pet-scene" id="pet-scene">
             <div class="bg-glow"></div>
             <div class="bubble" id="bubble">¡Hola!</div>
+            <!-- cosmetic items rendered here by JS -->
             <div class="pet-wrap" onclick="petTap()">
               <img class="pet-img" id="pet-img" src="" alt="pokemon">
             </div>
@@ -345,45 +386,37 @@ body::before{
         <!-- SHOP -->
         <div class="view" id="view-shop" style="padding:10px;flex-direction:column;gap:7px;width:100%;height:100%;justify-content:flex-start;overflow-y:auto">
           <div class="shop-hdr">
-            <div class="ptitle" style="margin:0">TIENDA</div>
+            <div class="ptitle" style="margin:0">TIENDA POKÉMON</div>
             <div class="shop-cb">🪙 <span id="shop-coins">40</span></div>
           </div>
+          <div style="font-size:13px;color:var(--textdim);margin-bottom:2px">Items cosméticos — aparecen en tu pantalla</div>
           <div class="sgrid" id="shop-grid"></div>
         </div>
 
       </div>
     </div>
-
     <div class="nbr">
       <button class="btn non" id="nav-pet"   onclick="switchView('pet')"><span class="bi">🐾</span>PET</button>
       <button class="btn"     id="nav-stats" onclick="switchView('stats')"><span class="bi">📊</span>STATS</button>
       <button class="btn"     id="nav-game"  onclick="switchView('game')"><span class="bi">🎮</span>JUEGO</button>
       <button class="btn"     id="nav-shop"  onclick="switchView('shop')"><span class="bi">🛒</span>TIENDA</button>
     </div>
-
   </div>
 
   <!-- RIGHT -->
   <div class="col-r" style="display:flex;flex-direction:column;gap:10px">
-
     <div class="panel">
       <div class="ptitle">EVOLUCIÓN</div>
       <div class="etree" id="evo-tree"></div>
     </div>
-
-    <div class="panel">
-      <div class="ptitle">LÍNEA</div>
-      <div style="display:flex;flex-direction:column;gap:5px">
-        <button class="btn" style="font-size:12px" onclick="setLine(0)">🌿 Bulbasaur</button>
-        <button class="btn" style="font-size:12px" onclick="setLine(1)">🔥 Charmander</button>
-        <button class="btn" style="font-size:12px" onclick="setLine(2)">💧 Squirtle</button>
-        <button class="btn" style="font-size:12px" onclick="setLine(3)">⚡ Pichu</button>
-      </div>
+    <div class="panel" style="font-size:13px;color:var(--textdim);line-height:1.8">
+      <div class="ptitle">ITEMS EQ.</div>
+      <div id="equip-summary" style="display:flex;flex-direction:column;gap:5px;font-size:13px"></div>
     </div>
-
   </div>
 
-</div>
+</div><!-- /layout -->
+</div><!-- /game-ui -->
 
 <!-- DEAD OVERLAY -->
 <div id="dead-ov">
@@ -395,43 +428,77 @@ body::before{
 <div class="notif" id="notif"></div>
 
 <script>
-const SPRITE='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
-const sp=id=>SPRITE+id+'.png';
+// ════════════════════════════════════════════════
+// POKÉMON EVOLUTION LINES
+// ════════════════════════════════════════════════
+const SP='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
+const sp=id=>SP+id+'.png';
 
 const LINES=[
-  {name:'Bulbasaur',evos:[
+  {name:'Bulbasaur',color:'#4CAF50',evos:[
     {id:1,  name:'Bulbasaur', minAge:0,  size:''},
     {id:2,  name:'Ivysaur',   minAge:5,  size:''},
     {id:3,  name:'Venusaur',  minAge:12, size:'big'},
     {id:45, name:'Vileplume', minAge:22, size:'big'},
   ]},
-  {name:'Charmander',evos:[
+  {name:'Charmander',color:'#FF5722',evos:[
     {id:4,  name:'Charmander', minAge:0,  size:''},
     {id:5,  name:'Charmeleon', minAge:5,  size:''},
     {id:6,  name:'Charizard',  minAge:12, size:'big'},
     {id:250,name:'Ho-Oh',      minAge:25, size:'giant'},
   ]},
-  {name:'Squirtle',evos:[
+  {name:'Squirtle',color:'#2196F3',evos:[
     {id:7,  name:'Squirtle',  minAge:0,  size:''},
     {id:8,  name:'Wartortle', minAge:5,  size:''},
     {id:9,  name:'Blastoise', minAge:12, size:'big'},
     {id:131,name:'Lapras',    minAge:22, size:'big'},
   ]},
-  {name:'Pichu',evos:[
-    {id:172,name:'Pichu',   minAge:0,  size:''},
-    {id:25, name:'Pikachu', minAge:4,  size:''},
-    {id:26, name:'Raichu',  minAge:10, size:''},
-    {id:135,name:'Jolteon', minAge:20, size:'big'},
+  {name:'Eevee',color:'#C8A96E',evos:[
+    {id:133,name:'Eevee',    minAge:0,  size:''},
+    {id:134,name:'Vaporeon', minAge:5,  size:''},
+    {id:135,name:'Jolteon',  minAge:12, size:'big'},
+    {id:136,name:'Flareon',  minAge:20, size:'big'},
   ]},
 ];
 
-const SAVE='pokepet_v3';
-let pet={hunger:80,happy:80,energy:80,health:100,hygiene:80,
-  age:0,weight:10,xp:0,coins:40,poop:0,alive:true,
-  evoIdx:0,lineIdx:0,_ageTick:0};
+// ════════════════════════════════════════════════
+// COSMETIC SHOP ITEMS (Pokémon items with sprites)
+// ════════════════════════════════════════════════
+// Sprites from official Pokémon item sprites repo
+const ITEM_SP='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/';
 
-const curLine=()=>LINES[pet.lineIdx];
-const curEvo =()=>curLine().evos[pet.evoIdx];
+const SHOP_ITEMS=[
+  // slot: hat (above pet), ground (beside pet), bg (background corner), badge (side of pet)
+  {id:'rare-candy',    name:'Rare Candy',    sprite:ITEM_SP+'rare-candy.png',     cost:15, slot:'hat',    desc:'¡Dulce raro!'},
+  {id:'master-ball',   name:'Master Ball',   sprite:ITEM_SP+'master-ball.png',    cost:30, slot:'bg',     desc:'La mejor Poké Ball'},
+  {id:'thunder-stone', name:'Thunder Stone', sprite:ITEM_SP+'thunder-stone.png',  cost:20, slot:'badge',  desc:'Piedra Trueno'},
+  {id:'oran-berry',    name:'Oran Berry',    sprite:ITEM_SP+'oran-berry.png',     cost:8,  slot:'ground', desc:'Baya nutritiva'},
+  {id:'potion',        name:'Poción',        sprite:ITEM_SP+'potion.png',         cost:10, slot:'badge',  desc:'Poción clásica'},
+  {id:'moon-stone',    name:'Moon Stone',    sprite:ITEM_SP+'moon-stone.png',     cost:20, slot:'bg',     desc:'Piedra Lunar'},
+  {id:'lure-ball',     name:'Lure Ball',     sprite:ITEM_SP+'lure-ball.png',      cost:12, slot:'hat',    desc:'Ball especial'},
+  {id:'sitrus-berry',  name:'Sitrus Berry',  sprite:ITEM_SP+'sitrus-berry.png',   cost:10, slot:'ground', desc:'Baya Zitrónea'},
+  {id:'full-restore',  name:'Full Restore',  sprite:ITEM_SP+'full-restore.png',   cost:40, slot:'badge',  desc:'Restauración total'},
+  {id:'pokeball',      name:'Poké Ball',     sprite:ITEM_SP+'poke-ball.png',      cost:5,  slot:'hat',    desc:'La clásica'},
+];
+
+// ════════════════════════════════════════════════
+// SAVE / STATE
+// ════════════════════════════════════════════════
+const SAVE_KEY='pokepet_v4';
+
+const DEFAULT_PET={
+  hunger:80,happy:80,energy:80,health:100,hygiene:80,
+  age:0,weight:10,xp:0,coins:40,poop:0,alive:true,
+  evoIdx:0,lineIdx:0,_ageTick:0,
+  dayProgress:0,  // 0–100% of the current in-game day
+  // owned/equipped items: {[itemId]: {owned:bool, equipped:bool}}
+  items:{},
+};
+
+let pet=JSON.parse(JSON.stringify(DEFAULT_PET));
+
+function curLine(){return LINES[pet.lineIdx]}
+function curEvo() {return curLine().evos[pet.evoIdx]}
 
 function clamp(v,mn=0,mx=100){return Math.max(mn,Math.min(mx,v))}
 function stat(k,d){
@@ -439,19 +506,84 @@ function stat(k,d){
   pet[k]=clamp((pet[k]||0)+d, k==='weight'?1:0, k==='coins'?9999:100);
 }
 
-/* SPRITE */
-function loadSprite(id,cb){
-  const img=new Image();img.crossOrigin='anonymous';
-  img.onload=()=>cb(img.src);img.onerror=()=>cb(null);
-  img.src=sp(id);
+// ════════════════════════════════════════════════
+// STARTER SCREEN
+// ════════════════════════════════════════════════
+let selectedLine=null;
+
+function buildStarterScreen(){
+  const grid=document.getElementById('starter-grid');
+  LINES.forEach((line,i)=>{
+    const card=document.createElement('div');
+    card.className='starter-card';
+    card.id='sc-'+i;
+    const firstEvo=line.evos[0];
+    card.innerHTML=`<img src="${sp(firstEvo.id)}" alt="${firstEvo.name}">
+      <div class="starter-name">${line.name.toUpperCase()}</div>
+      <div class="starter-type">${['🌿 Planta','🔥 Fuego','💧 Agua','🌟 Normal'][i]}</div>`;
+    card.onclick=()=>selectStarter(i);
+    grid.appendChild(card);
+  });
 }
+
+function selectStarter(i){
+  selectedLine=i;
+  document.querySelectorAll('.starter-card').forEach((c,j)=>c.classList.toggle('sel',j===i));
+  const btn=document.getElementById('start-btn');
+  btn.style.opacity='1';btn.style.pointerEvents='auto';
+}
+
+function confirmStarter(){
+  if(selectedLine===null)return;
+  pet.lineIdx=selectedLine;
+  document.getElementById('starter').classList.add('hidden');
+  document.getElementById('game-ui').style.display='block';
+  initGame();
+}
+
+// ════════════════════════════════════════════════
+// INIT GAME
+// ════════════════════════════════════════════════
+function initGame(){
+  updatePetImg();renderEvoTree();updateHUD();updateClock();
+  document.getElementById('evo-hud').textContent=curEvo().name.toUpperCase();
+  renderEquipSummary();
+  checkEvolution();
+  setInterval(gameTick,6000);
+  setInterval(updateClock,10000);
+  setInterval(advanceDayProgress,3000); // advance day bar every 3s
+  updateClock();
+  updateDayBar();
+  setTimeout(()=>showBubble('¡Hola! Cuídame bien ✨',3000),700);
+}
+
+// ════════════════════════════════════════════════
+// SAVE / LOAD
+// ════════════════════════════════════════════════
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(pet))}catch(e){}}
+function loadSave(){
+  try{
+    const r=localStorage.getItem(SAVE_KEY);
+    if(r){
+      const s=JSON.parse(r);
+      Object.assign(pet,s);
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+// ════════════════════════════════════════════════
+// SPRITE / PET IMG
+// ════════════════════════════════════════════════
 function updatePetImg(){
   const el=document.getElementById('pet-img');
   const evo=curEvo();
   el.className='pet-img'+(evo.size?' '+evo.size:'');
-  if(!pet.alive) el.classList.add('anim-dead');
-  loadSprite(evo.id,src=>{if(src)el.src=src;});
+  if(!pet.alive)el.classList.add('anim-dead');
+  el.src=sp(evo.id);
 }
+
 function setAnim(a,dur){
   const el=document.getElementById('pet-img');
   const base='pet-img'+(curEvo().size?' '+curEvo().size:'');
@@ -460,35 +592,25 @@ function setAnim(a,dur){
   el._at=setTimeout(()=>{el.className=base;if(!pet.alive)el.classList.add('anim-dead');},dur);
 }
 
-/* EVO TREE */
+// ════════════════════════════════════════════════
+// EVOLUTION TREE
+// ════════════════════════════════════════════════
 function renderEvoTree(){
-  const t=document.getElementById('evo-tree');
-  t.innerHTML='';
+  const t=document.getElementById('evo-tree');t.innerHTML='';
   curLine().evos.forEach((evo,i)=>{
     if(i>0){const a=document.createElement('div');a.className='earrow';t.appendChild(a);}
     const el=document.createElement('div');
     el.className='eitem '+(i===pet.evoIdx?'cur':i<pet.evoIdx?'done':'locked');
-    el.innerHTML=`<img class="esp" src="${sp(evo.id)}" alt="${evo.name}" onerror="this.style.opacity='.15'">
+    el.innerHTML=`<img class="esp" src="${sp(evo.id)}" alt="${evo.name}">
       <div class="ein">
         <div class="enm">${evo.name.toUpperCase()}</div>
         <div class="ereq">${evo.minAge===0?'INICIO':'DÍA '+evo.minAge}</div>
       </div>
-      ${i===pet.evoIdx?'<span class="ebadge">NOW</span>':i<pet.evoIdx?'<span style="color:var(--glow);font-size:12px">✓</span>':''}`;
+      ${i===pet.evoIdx?'<span class="ebadge">NOW</span>':i<pet.evoIdx?'<span style="color:var(--glow);font-size:13px">✓</span>':''}`;
     t.appendChild(el);
   });
 }
 
-/* LINE CHANGE */
-function setLine(idx){
-  pet.lineIdx=idx;pet.evoIdx=0;pet.age=0;pet._ageTick=0;
-  updatePetImg();renderEvoTree();
-  document.getElementById('evo-hud').textContent=LINES[idx].evos[0].name.toUpperCase();
-  showBubble('¡Hola! Soy '+LINES[idx].evos[0].name);
-  showNotif('Línea: '+LINES[idx].name,'var(--glow2)');
-  save();
-}
-
-/* EVOLUTION */
 function checkEvolution(){
   const line=curLine();let ni=pet.evoIdx;
   for(let i=0;i<line.evos.length;i++)if(pet.age>=line.evos[i].minAge)ni=i;
@@ -496,17 +618,143 @@ function checkEvolution(){
     pet.evoIdx=ni;
     const evo=curEvo();
     const el=document.getElementById('pet-img');
-    loadSprite(evo.id,src=>{
-      if(src){el.src=src;el.classList.add('evolving');setTimeout(()=>el.classList.remove('evolving'),1800);}
-    });
+    el.src=sp(evo.id);
+    el.classList.add('evolving');
+    setTimeout(()=>el.classList.remove('evolving'),2000);
     document.getElementById('evo-hud').textContent=evo.name.toUpperCase();
-    showBubble('¡HE EVOLUCIONADO! 🌟',3000);
+    showBubble('¡HE EVOLUCIONADO! 🌟',3200);
     showNotif('¡EVOLUCIÓN! → '+evo.name.toUpperCase(),'var(--amber)');
     renderEvoTree();
+    updatePetImg();
   }
 }
 
-/* VIEWS */
+// ════════════════════════════════════════════════
+// DAY PROGRESS BAR
+// ════════════════════════════════════════════════
+const PHASES=[
+  {pct:0,  label:'🌅 ALBA',  fill:'0%'},
+  {pct:20, label:'☀️ MAÑANA',fill:''},
+  {pct:45, label:'🌞 TARDE', fill:''},
+  {pct:70, label:'🌆 TARDE', fill:''},
+  {pct:85, label:'🌙 NOCHE', fill:''},
+  {pct:95, label:'⭐ NOCHE', fill:''},
+];
+
+function advanceDayProgress(){
+  if(!pet.alive)return;
+  pet.dayProgress=Math.min(100,pet.dayProgress+1); // +1% every 3s → full day = 5 min
+  if(pet.dayProgress>=100){
+    pet.dayProgress=0;
+    pet.age++;
+    stat('xp',10);
+    stat('coins',3); // passive daily income
+    checkEvolution();
+    showNotif('🌅 Nuevo día! Día '+pet.age+' +3🪙','var(--glow2)');
+    document.getElementById('day-hud').textContent='DÍA '+pet.age;
+    document.getElementById('day-num').textContent='DÍA '+pet.age;
+    document.getElementById('s-age').textContent=pet.age;
+  }
+  updateDayBar();
+  save();
+}
+
+function updateDayBar(){
+  const pct=pet.dayProgress;
+  document.getElementById('day-fill').style.width=pct+'%';
+  // phase label
+  let phase=PHASES[0];
+  for(const p of PHASES)if(pct>=p.pct)phase=p;
+  document.getElementById('day-phase').textContent=phase.label;
+  // tint fill color along gradient
+  document.getElementById('day-fill').style.backgroundPosition=(100-pct)+'% 0';
+}
+
+// ════════════════════════════════════════════════
+// COSMETIC ITEMS
+// ════════════════════════════════════════════════
+function renderShopItems(){
+  document.getElementById('shop-coins').textContent=Math.round(pet.coins);
+  const g=document.getElementById('shop-grid');g.innerHTML='';
+  SHOP_ITEMS.forEach(item=>{
+    const owned=pet.items[item.id]?.owned;
+    const equipped=pet.items[item.id]?.equipped;
+    const el=document.createElement('div');
+    el.className='sitem'+(equipped?' equipped':owned?' owned':'');
+    el.innerHTML=`<img class="si-sprite" src="${item.sprite}" alt="${item.name}" onerror="this.style.opacity='.3'">
+      <div class="si-nm">${item.name}</div>
+      <div class="si-slot">[${item.slot.toUpperCase()}]</div>
+      ${owned?`<div class="si-co" style="color:var(--glow)">${equipped?'QUITAR':'EQUIPAR'}</div>`:
+              `<div class="si-co">🪙 ${item.cost}</div>`}
+      <div class="si-de">${item.desc}</div>`;
+    el.onclick=()=>handleShopItem(item);
+    g.appendChild(el);
+  });
+}
+
+function handleShopItem(item){
+  if(!pet.alive)return;
+  if(!pet.items[item.id]?.owned){
+    // Buy
+    if(pet.coins<item.cost){showNotif('¡Sin monedas!','var(--red)');return}
+    stat('coins',-item.cost);
+    if(!pet.items[item.id])pet.items[item.id]={};
+    pet.items[item.id].owned=true;
+    pet.items[item.id].equipped=false;
+    showNotif('¡'+item.name+' comprado!','var(--amber)');
+  } else {
+    // Toggle equip — unequip others in same slot
+    const wasEquipped=pet.items[item.id].equipped;
+    if(!wasEquipped){
+      // unequip any other item in same slot
+      SHOP_ITEMS.forEach(it=>{
+        if(it.slot===item.slot&&it.id!==item.id&&pet.items[it.id]?.equipped)
+          pet.items[it.id].equipped=false;
+      });
+    }
+    pet.items[item.id].equipped=!wasEquipped;
+    showNotif(pet.items[item.id].equipped?'Equipado: '+item.name:'Quitado: '+item.name,
+      pet.items[item.id].equipped?'var(--glow)':'var(--textdim)');
+  }
+  renderShopItems();
+  renderSceneItems();
+  renderEquipSummary();
+  updateHUD();
+  save();
+}
+
+function renderSceneItems(){
+  // Remove old scene items
+  document.querySelectorAll('.scene-item').forEach(e=>e.remove());
+  const scene=document.getElementById('pet-scene');
+  const petH=curEvo().size==='giant'?142:curEvo().size==='big'?118:96;
+  SHOP_ITEMS.forEach(item=>{
+    if(!pet.items[item.id]?.equipped)return;
+    const img=document.createElement('img');
+    img.className='scene-item slot-'+item.slot;
+    img.src=item.sprite;img.alt=item.name;
+    if(item.slot==='hat') img.style.setProperty('--pet-h',petH+'px');
+    scene.insertBefore(img,scene.querySelector('.ground'));
+  });
+}
+
+function renderEquipSummary(){
+  const wrap=document.getElementById('equip-summary');
+  const equipped=SHOP_ITEMS.filter(it=>pet.items[it.id]?.equipped);
+  if(equipped.length===0){
+    wrap.innerHTML='<span style="color:var(--textdim);font-size:13px">Sin items</span>';return;
+  }
+  wrap.innerHTML=equipped.map(it=>
+    `<div style="display:flex;align-items:center;gap:6px">
+      <img src="${it.sprite}" style="width:24px;height:24px;image-rendering:pixelated">
+      <span style="font-size:13px">${it.name}</span>
+    </div>`
+  ).join('');
+}
+
+// ════════════════════════════════════════════════
+// VIEWS
+// ════════════════════════════════════════════════
 let currentView='pet';
 function switchView(v){
   ['pet','stats','game','shop'].forEach(id=>{
@@ -517,12 +765,15 @@ function switchView(v){
   const n=document.getElementById('nav-'+v);if(n)n.classList.add('non');
   currentView=v;
   if(v==='stats')refreshStats();
-  if(v==='shop')renderShop();
+  if(v==='shop')renderShopItems();
   if(v!=='game')snakeStop();
   document.getElementById('l-game').classList.toggle('on',v==='game');
+  if(v==='pet')renderSceneItems();
 }
 
-/* HUD */
+// ════════════════════════════════════════════════
+// HUD
+// ════════════════════════════════════════════════
 function updateHUD(){
   ['hunger','happy','energy','health','hygiene'].forEach(k=>{
     const b=document.getElementById('mb-'+k),v=document.getElementById('mv-'+k);
@@ -530,6 +781,7 @@ function updateHUD(){
   });
   document.getElementById('hdr-coins').textContent=Math.round(pet.coins);
   document.getElementById('day-hud').textContent='DÍA '+pet.age;
+  document.getElementById('day-num').textContent='DÍA '+pet.age;
   document.getElementById('s-age').textContent=pet.age;
   document.getElementById('s-weight').textContent=Math.round(pet.weight);
   document.getElementById('s-xp').textContent=pet.xp;
@@ -537,6 +789,7 @@ function updateHUD(){
   document.getElementById('l-alert').classList.toggle('on',alert);
   renderPoops();
 }
+
 function refreshStats(){
   ['hunger','happy','energy','health','hygiene'].forEach(k=>{
     const b=document.getElementById('sb-'+k),v=document.getElementById('sv-'+k);
@@ -547,15 +800,17 @@ function refreshStats(){
   document.getElementById('d-xp').textContent=pet.xp;
   document.getElementById('d-coins').textContent=Math.round(pet.coins);
 }
+
 function renderPoops(){
   const l=document.getElementById('poop-layer');l.innerHTML='';
   for(let i=0;i<Math.min(pet.poop,5);i++){
-    const p=document.createElement('span');
-    p.className='pi';p.textContent='💩';p.onclick=cleanPoop;l.appendChild(p);
+    const p=document.createElement('span');p.className='pi';p.textContent='💩';p.onclick=cleanPoop;l.appendChild(p);
   }
 }
 
-/* SPEECH */
+// ════════════════════════════════════════════════
+// SPEECH / NOTIF
+// ════════════════════════════════════════════════
 const MSGS={
   hungry:['¡Tengo hambre!','Necesito comer...','¡Comida!'],
   unhappy:['¡Juega conmigo!','Estoy aburrido...'],
@@ -568,7 +823,8 @@ const MSGS={
   poop:['Necesito ir al baño...','Urgente...'],
   sleep:['Buenas noches...','Zzz 💤'],
 };
-const randMsg=k=>{const a=MSGS[k];return a[Math.floor(Math.random()*a.length)]};
+const rMsg=k=>{const a=MSGS[k];return a[Math.floor(Math.random()*a.length)]};
+
 function showBubble(msg,dur=2200){
   const b=document.getElementById('bubble');
   b.textContent=msg;b.classList.add('show');
@@ -581,29 +837,33 @@ function showNotif(msg,color='var(--glow)'){
 }
 function spawnCoin(){
   const el=document.createElement('div');el.className='cf';el.textContent='+🪙';
-  el.style.left=(window.innerWidth/2-20)+'px';el.style.top=(window.innerHeight/2-40)+'px';
+  el.style.left=(window.innerWidth/2-20)+'px';el.style.top=(window.innerHeight*.4)+'px';
   document.body.appendChild(el);setTimeout(()=>el.remove(),1000);
 }
 
-/* ACTIONS */
+// ════════════════════════════════════════════════
+// ACTIONS — no coins from feeding/playing
+// ════════════════════════════════════════════════
 function feedPet(){
   if(!pet.alive)return;
-  if(pet.hunger>=95){showBubble(randMsg('full'));showNotif('¡Ya está lleno!','var(--amber)');return}
-  stat('hunger',30);stat('weight',1);stat('energy',5);stat('xp',2);stat('coins',2);
-  setAnim('eat',1600);showBubble(randMsg('happy'));showNotif('¡Ñam ñam! +30 🍔','var(--amber)');
-  spawnCoin();updateHUD();checkEvolution();
+  if(pet.hunger>=95){showBubble(rMsg('full'));showNotif('¡Ya está lleno!','var(--amber)');return}
+  stat('hunger',30);stat('weight',1);stat('energy',5);stat('xp',2);
+  setAnim('eat',1600);showBubble(rMsg('happy'));
+  showNotif('¡Ñam ñam! +30 🍔','var(--amber)');
+  updateHUD();checkEvolution();
 }
 function playPet(){
   if(!pet.alive)return;
-  if(pet.energy<10){showBubble(randMsg('tired'));showNotif('¡Sin energía!','var(--glow2)');return}
-  stat('happy',25);stat('energy',-20);stat('hunger',-10);stat('hygiene',-8);stat('xp',5);stat('coins',3);
-  setAnim('play',2300);showBubble(randMsg('happy'));showNotif('¡A jugar! +25 😊','var(--pink)');
-  spawnCoin();updateHUD();checkEvolution();
+  if(pet.energy<10){showBubble(rMsg('tired'));showNotif('¡Sin energía!','var(--glow2)');return}
+  stat('happy',25);stat('energy',-20);stat('hunger',-10);stat('hygiene',-8);stat('xp',5);
+  setAnim('play',2300);showBubble(rMsg('happy'));
+  showNotif('¡A jugar! +25 😊','var(--pink)');
+  updateHUD();checkEvolution();
 }
 function sleepPet(){
   if(!pet.alive)return;
   stat('energy',50);stat('hunger',-15);stat('health',5);
-  showBubble(randMsg('sleep'));showNotif('Descansando... +50 ⚡','var(--glow2)');updateHUD();
+  showBubble(rMsg('sleep'));showNotif('Descansando... +50 ⚡','var(--glow2)');updateHUD();
 }
 function cleanPet(){
   if(!pet.alive)return;
@@ -611,94 +871,62 @@ function cleanPet(){
   showBubble('¡Limpio! 🚿');showNotif('¡Limpio! +40 🚿','var(--purple)');updateHUD();
 }
 function cleanPoop(){
-  pet.poop=0;stat('hygiene',10);stat('happy',5);stat('coins',1);
+  pet.poop=0;stat('hygiene',10);stat('happy',5);
   showNotif('¡Limpiado! 💩','var(--purple)');updateHUD();
 }
-function petTap(){showBubble(randMsg('tap'));stat('happy',2);updateHUD();}
+function petTap(){showBubble(rMsg('tap'));stat('happy',2);updateHUD();}
 function revivePet(){
-  Object.assign(pet,{hunger:80,happy:80,energy:80,health:100,hygiene:80,
-    age:0,weight:10,xp:0,coins:40,poop:0,alive:true,evoIdx:0,_ageTick:0});
+  const li=pet.lineIdx;const items=pet.items;
+  Object.assign(pet,JSON.parse(JSON.stringify(DEFAULT_PET)));
+  pet.lineIdx=li;pet.items=items; // keep line and purchases
   document.getElementById('dead-ov').classList.remove('show');
-  updatePetImg();updateHUD();renderEvoTree();
+  updatePetImg();updateHUD();renderEvoTree();renderSceneItems();
   showBubble('¡He vuelto! ✨',3000);save();
 }
 
-/* SHOP */
-const SHOP=[
-  {icon:'🍖',name:'Comida',   cost:5, fx:()=>{stat('hunger',25);stat('weight',1)},      desc:'+25 hambre'},
-  {icon:'🍕',name:'Pizza',    cost:12,fx:()=>{stat('hunger',50);stat('happy',10)},        desc:'+50 hambre +10 feliz'},
-  {icon:'⚽',name:'Pelota',   cost:8, fx:()=>{stat('happy',20);stat('energy',-10)},       desc:'+20 feliz'},
-  {icon:'🎲',name:'Juguete',  cost:15,fx:()=>{stat('happy',35);stat('energy',-15)},       desc:'+35 feliz'},
-  {icon:'💊',name:'Medicina', cost:20,fx:()=>{stat('health',40)},                         desc:'+40 salud'},
-  {icon:'🧴',name:'Jabón',    cost:6, fx:()=>{stat('hygiene',50)},                        desc:'+50 higiene'},
-  {icon:'⚡',name:'Energizer',cost:10,fx:()=>{stat('energy',40)},                         desc:'+40 energía'},
-  {icon:'🍬',name:'Caramelo', cost:3, fx:()=>{stat('happy',15);stat('hunger',10);stat('health',-5)},desc:'+feliz -salud'},
-];
-function renderShop(){
-  document.getElementById('shop-coins').textContent=Math.round(pet.coins);
-  const g=document.getElementById('shop-grid');g.innerHTML='';
-  SHOP.forEach(item=>{
-    const el=document.createElement('div');el.className='sitem';
-    el.innerHTML=`<div class="si-ic">${item.icon}</div>
-      <div class="si-nm">${item.name}</div>
-      <div class="si-co">🪙 ${item.cost}</div>
-      <div class="si-de">${item.desc}</div>`;
-    el.onclick=()=>{
-      if(!pet.alive)return;
-      if(pet.coins<item.cost){showNotif('¡Sin monedas!','var(--red)');return}
-      stat('coins',-item.cost);item.fx();
-      showNotif(`${item.icon} ${item.name} comprado!`,'var(--amber)');
-      updateHUD();renderShop();switchView('pet');showBubble('¡Gracias! '+item.icon);
-    };
-    g.appendChild(el);
-  });
-}
-
-/* TICK */
+// ════════════════════════════════════════════════
+// GAME TICK
+// ════════════════════════════════════════════════
 function gameTick(){
   if(!pet.alive)return;
   stat('hunger',-2.5);stat('happy',-1.5);stat('energy',-1.2);stat('hygiene',-1.0);
   if(pet.hunger<15)stat('health',-3);if(pet.hygiene<15)stat('health',-2);
   if(pet.poop>3)stat('health',-2);if(pet.hunger>40&&pet.happy>40)stat('health',.5);
-  if(Math.random()<.05&&pet.poop<5){pet.poop++;if(currentView==='pet')showBubble(randMsg('poop'));}
-  if(pet.health>50)stat('coins',1);
-  pet._ageTick=(pet._ageTick||0)+1;
-  if(pet._ageTick>=20){pet._ageTick=0;pet.age++;stat('xp',10);checkEvolution();}
+  if(Math.random()<.05&&pet.poop<5){pet.poop++;if(currentView==='pet')showBubble(rMsg('poop'));}
   if(Math.random()<.1&&currentView==='pet'){
-    if(pet.hunger<25)showBubble(randMsg('hungry'));
-    else if(pet.happy<25)showBubble(randMsg('unhappy'));
-    else if(pet.energy<15)showBubble(randMsg('tired'));
-    else if(pet.health<25)showBubble(randMsg('sick'));
-    else if(pet.hygiene<20)showBubble(randMsg('dirty'));
+    if(pet.hunger<25)showBubble(rMsg('hungry'));
+    else if(pet.happy<25)showBubble(rMsg('unhappy'));
+    else if(pet.energy<15)showBubble(rMsg('tired'));
+    else if(pet.health<25)showBubble(rMsg('sick'));
+    else if(pet.hygiene<20)showBubble(rMsg('dirty'));
   }
   if(pet.health<=0){
-    pet.alive=false;pet.health=0;
-    updatePetImg();
+    pet.alive=false;pet.health=0;updatePetImg();
     showBubble('...',99999);showNotif('💀 Murió...','var(--red)');
     setTimeout(()=>document.getElementById('dead-ov').classList.add('show'),1800);
   }
   updateHUD();if(currentView==='stats')refreshStats();save();
 }
 
-/* SAVE/LOAD */
-function save(){try{localStorage.setItem(SAVE,JSON.stringify(pet))}catch(e){}}
-function load(){try{const r=localStorage.getItem(SAVE);if(r)Object.assign(pet,JSON.parse(r));}catch(e){}}
-
-/* CLOCK */
+// ════════════════════════════════════════════════
+// CLOCK
+// ════════════════════════════════════════════════
 function updateClock(){
   const n=new Date();
   document.getElementById('clock').textContent=
     String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
 }
 
-/* SNAKE */
+// ════════════════════════════════════════════════
+// SNAKE — coins only from game
+// ════════════════════════════════════════════════
 let snakeLoop=null,SS=null;
 const SC=13,COLS=20,ROWS=15;
 function snakeInit(){return{snake:[{x:10,y:7},{x:9,y:7},{x:8,y:7}],dir:{x:1,y:0},next:{x:1,y:0},food:snakeFood([{x:10,y:7}]),score:0,over:false}}
 function snakeFood(s){let f;do{f={x:Math.floor(Math.random()*COLS),y:Math.floor(Math.random()*ROWS)}}while(s.some(b=>b.x===f.x&&b.y===f.y));return f}
 function snakeStart(){
   document.getElementById('snake-modal').classList.remove('show');
-  document.getElementById('game-msg').textContent='WASD / flechas';
+  document.getElementById('game-msg').textContent='WASD / flechas / Swipe';
   SS=snakeInit();clearInterval(snakeLoop);snakeLoop=setInterval(snakeTick,120);
 }
 function snakeStop(){clearInterval(snakeLoop);snakeLoop=null;}
@@ -709,7 +937,9 @@ function snakeTick(){
   SS.snake.unshift(h);
   if(h.x===SS.food.x&&h.y===SS.food.y){
     SS.score++;document.getElementById('snake-score').textContent=SS.score;
-    SS.food=snakeFood(SS.snake);stat('happy',5);stat('coins',2);updateHUD();
+    SS.food=snakeFood(SS.snake);
+    // Every food = +1 coin (only source during game)
+    stat('coins',1);updateHUD();
   }else SS.snake.pop();
   snakeDraw();
 }
@@ -728,10 +958,12 @@ function snakeDraw(){
   });ctx.shadowBlur=0;
 }
 function snakeOver(score){
-  clearInterval(snakeLoop);const c=score*2;
-  stat('coins',c);stat('happy',score*3);stat('xp',score*5);updateHUD();save();
-  document.getElementById('snake-result').textContent=`Score: ${score}  |  +${c}🪙`;
+  clearInterval(snakeLoop);
+  const coins=score*3; // bonus at end
+  stat('coins',coins);stat('happy',score*3);stat('xp',score*5);updateHUD();save();
+  document.getElementById('snake-result').textContent=`Score: ${score}  |  +${coins}🪙 bonus`;
   document.getElementById('snake-modal').classList.add('show');
+  spawnCoin();
 }
 document.addEventListener('keydown',e=>{
   if(currentView!=='game'||!SS)return;
@@ -749,13 +981,20 @@ document.getElementById('snake-cv').addEventListener('touchend',e=>{
   tSt=null;e.preventDefault();
 },{passive:false});
 
-/* INIT */
-load();
-updatePetImg();renderEvoTree();updateHUD();updateClock();
-document.getElementById('evo-hud').textContent=curEvo().name.toUpperCase();
-checkEvolution();
-setInterval(gameTick,6000);setInterval(updateClock,10000);
-setTimeout(()=>showBubble('¡Hola! Cuídame bien ✨',3000),800);
+// ════════════════════════════════════════════════
+// BOOT — check for saved game or show starter
+// ════════════════════════════════════════════════
+buildStarterScreen();
+const hasSave=loadSave();
+if(hasSave&&pet.lineIdx!==undefined){
+  // Has save — skip starter, go straight to game
+  document.getElementById('starter').classList.add('hidden');
+  document.getElementById('game-ui').style.display='block';
+  initGame();
+} else {
+  // Show starter screen
+  document.getElementById('game-ui').style.display='none';
+}
 </script>
 </body>
 </html>
